@@ -23,10 +23,3 @@
 
 - `GET /orders` get all orders
 - `POST /orders` new order
-
-
-- `GET /events` all events
-- `GET /events/:id` get specific event details
-- `POST /events` add new event
-- `PUT /events/:id` update event
-- `DELETE /events/:id` delete event
