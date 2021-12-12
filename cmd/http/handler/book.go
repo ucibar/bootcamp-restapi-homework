@@ -30,6 +30,8 @@ func NewBookHandler(repository BookRepository) *BookHandler {
 	return &BookHandler{repository: repository}
 }
 
+// GetAllBooks returns a list of books
+// if price query parameter with format '<operator> <price>' is specified, it will return books filtered by price
 func (handler BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	var books []*model.Book
 
