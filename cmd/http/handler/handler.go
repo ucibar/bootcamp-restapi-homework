@@ -13,8 +13,6 @@ type JSONResponse struct {
 }
 
 func JSONWriter(w http.ResponseWriter, response *JSONResponse) {
-	w.Header().Set("Content-Type", "application/json")
-
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)

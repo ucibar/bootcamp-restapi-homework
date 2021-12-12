@@ -22,6 +22,14 @@ func main() {
 
 	r := mux.NewRouter()
 
+	// Global middleware for SetContentType application/json
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	r.HandleFunc("/authors", authorHandler.GetAllAuthors).Methods("GET")
 	r.HandleFunc("/authors", authorHandler.CreateAuthor).Methods("POST")
 	r.HandleFunc("/authors/{id:[0-9]+}", authorHandler.GetAuthor).Methods("GET")
