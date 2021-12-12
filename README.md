@@ -10,7 +10,10 @@
 - `GET /authors/:id/books` get books of author
 
 
-- `GET /books` get details of all books
+- `GET /books` get details of all books. 
+- `GET /books?price=":price"` get books with price equal to <price>
+- `GET /books?price="< :price"` get books with price lower than <price>
+- `GET /books?price="> :price"` get books with price higher than <price>
 - `POST /books` add new book
 - `GET /books/:id` get details of a book
 - `PUT /books/:id` update book

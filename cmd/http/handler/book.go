@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type BookRepository interface {
@@ -17,6 +18,8 @@ type BookRepository interface {
 	Delete(id int) (*model.Book, error)
 	Create(book *model.Book) (*model.Book, error)
 	Update(id int, book *model.Book) error
+
+	ReadByPrice(price float64, operator string) []*model.Book
 }
 
 type BookHandler struct {
@@ -28,7 +31,27 @@ func NewBookHandler(repository BookRepository) *BookHandler {
 }
 
 func (handler BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
-	books := handler.repository.All()
+	var books []*model.Book
+
+	query := r.URL.Query()
+
+	if query.Has("price") {
+		priceQuery := strings.Fields(query.Get("price"))
+
+		var price float64
+		var operator string = "="
+
+		if len(priceQuery) == 1 {
+			price, _ = strconv.ParseFloat(priceQuery[0], 64)
+		} else if len(priceQuery) == 2 {
+			price, _ = strconv.ParseFloat(priceQuery[1], 64)
+			operator = priceQuery[0]
+		}
+
+		books = handler.repository.ReadByPrice(price, operator)
+	} else {
+		books = handler.repository.All()
+	}
 
 	response := &JSONResponse{Data: books}
 

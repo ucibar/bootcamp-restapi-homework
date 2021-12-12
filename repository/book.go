@@ -43,6 +43,29 @@ func (repository *InMemoryBookRepository) ReadByAuthor(authorID int) []*model.Bo
 	return books
 }
 
+func (repository *InMemoryBookRepository) ReadByPrice(price float64, operator string) []*model.Book {
+	books := make([]*model.Book, 0)
+
+	for _, book := range repository.books {
+		switch operator[0] {
+		case '>':
+			if book.Price > price {
+				books = append(books, book)
+			}
+		case '<':
+			if book.Price < price {
+				books = append(books, book)
+			}
+		case '=':
+			if book.Price == price {
+				books = append(books, book)
+			}
+		}
+	}
+
+	return books
+}
+
 func (repository *InMemoryBookRepository) Create(book *model.Book) (*model.Book, error) {
 	book.ID = len(repository.books) + 1
 	repository.books[book.ID] = book
