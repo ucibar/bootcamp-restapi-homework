@@ -15,6 +15,8 @@ func main() {
 	bookRepo := repository.NewInMemoryBookRepository()
 	bookHandler := handler.NewBookHandler(bookRepo)
 
+	authorBookHandler := handler.NewAuthorBookHandler(authorRepo, bookRepo)
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/authors", authorHandler.GetAllAuthors).Methods("GET")
@@ -28,6 +30,9 @@ func main() {
 	r.HandleFunc("/books/{id:[0-9]+}", bookHandler.GetBook).Methods("GET")
 	r.HandleFunc("/books/{id:[0-9]+}", bookHandler.UpdateBook).Methods("PUT")
 	r.HandleFunc("/books/{id:[0-9]+}", bookHandler.DeleteBook).Methods("DELETE")
+
+	r.HandleFunc("/authors/{id:[0-9]+}/books", authorBookHandler.GetBooksOfAuthor).Methods("GET")
+	r.HandleFunc("/books/{id:[0-9]+}/author", authorBookHandler.GetAuthorOfBook).Methods("GET")
 
 	log.Println("Server is listening on port 8089")
 	log.Fatal(http.ListenAndServe(":8089", r))

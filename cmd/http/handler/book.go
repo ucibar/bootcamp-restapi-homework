@@ -13,6 +13,7 @@ import (
 type BookRepository interface {
 	All() []*model.Book
 	Read(id int) (*model.Book, error)
+	ReadByAuthor(authorID int) []*model.Book
 	Delete(id int) (*model.Book, error)
 	Create(book *model.Book) (*model.Book, error)
 	Update(id int, book *model.Book) error

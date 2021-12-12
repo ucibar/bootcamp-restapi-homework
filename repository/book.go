@@ -31,6 +31,18 @@ func (repository *InMemoryBookRepository) Read(id int) (*model.Book, error) {
 	return book, nil
 }
 
+func (repository *InMemoryBookRepository) ReadByAuthor(authorID int) []*model.Book {
+	books := make([]*model.Book, 0)
+
+	for _, book := range repository.books {
+		if book.AuthorID == authorID {
+			books = append(books, book)
+		}
+	}
+
+	return books
+}
+
 func (repository *InMemoryBookRepository) Create(book *model.Book) (*model.Book, error) {
 	book.ID = len(repository.books) + 1
 	repository.books[book.ID] = book
