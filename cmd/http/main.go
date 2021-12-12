@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func main()  {
+func main() {
 	authorRepo := repository.NewInMemoryAuthorRepository()
 	authorHandler := handler.NewAuthorHandler(authorRepo)
 
