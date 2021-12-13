@@ -1,4 +1,4 @@
-# Book Catalogue, Order And Online Read RESTful API
+# Book Catalogue, Order RESTful API
 
 ## Planned Endpoints
 - `GET /authors` get details of all authors
