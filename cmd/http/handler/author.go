@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bootcamp-homework/model"
-	"bootcamp-homework/repository"
+	"bootcamp-homework/service"
 	"errors"
 	"github.com/gorilla/mux"
 	"log"
@@ -10,24 +10,16 @@ import (
 	"strconv"
 )
 
-type AuthorRepository interface {
-	All() []*model.Author
-	Read(id int) (*model.Author, error)
-	Delete(id int) (*model.Author, error)
-	Create(author *model.Author) (*model.Author, error)
-	Update(id int, author *model.Author) error
-}
-
 type AuthorHandler struct {
-	repository AuthorRepository
+	service *service.AuthorService
 }
 
-func NewAuthorHandler(repository AuthorRepository) *AuthorHandler {
-	return &AuthorHandler{repository: repository}
+func NewAuthorHandler(service *service.AuthorService) *AuthorHandler {
+	return &AuthorHandler{service: service}
 }
 
-func (handler AuthorHandler) GetAllAuthors(w http.ResponseWriter, r *http.Request) {
-	authors := handler.repository.All()
+func (handler *AuthorHandler) GetAllAuthors(w http.ResponseWriter, r *http.Request) {
+	authors := handler.service.GetAllAuthors()
 
 	response := &JSONResponse{Data: authors}
 
@@ -39,7 +31,7 @@ func (handler *AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Reques
 
 	JSONReader(w, r.Body, author)
 
-	author, err := handler.repository.Create(author)
+	author, err := handler.service.CreateAuthor(author)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
@@ -57,9 +49,9 @@ func (handler *AuthorHandler) GetAuthor(w http.ResponseWriter, r *http.Request) 
 
 	response := &JSONResponse{}
 
-	author, err := handler.repository.Read(id)
+	author, err := handler.service.GetAuthorByID(id)
 
-	if errors.Is(err, repository.ErrAuthorNotFound) {
+	if errors.Is(err, model.ErrAuthorNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
@@ -84,9 +76,9 @@ func (handler *AuthorHandler) UpdateAuthor(w http.ResponseWriter, r *http.Reques
 
 	response := &JSONResponse{}
 
-	err = handler.repository.Update(id, author)
+	err = handler.service.UpdateAuthor(id, author)
 
-	if errors.Is(err, repository.ErrAuthorNotFound) {
+	if errors.Is(err, model.ErrAuthorNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
@@ -107,9 +99,9 @@ func (handler *AuthorHandler) DeleteAuthor(w http.ResponseWriter, r *http.Reques
 
 	response := &JSONResponse{}
 
-	author, err := handler.repository.Delete(id)
+	author, err := handler.service.DeleteAuthor(id)
 
-	if errors.Is(err, repository.ErrAuthorNotFound) {
+	if errors.Is(err, model.ErrAuthorNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)

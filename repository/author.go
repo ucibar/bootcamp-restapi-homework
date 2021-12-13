@@ -23,10 +23,10 @@ func (repository *InMemoryAuthorRepository) All() []*model.Author {
 	return authors
 }
 
-func (repository *InMemoryAuthorRepository) Read(id int) (*model.Author, error) {
-	author, ok := repository.authors[id]
+func (repository *InMemoryAuthorRepository) Read(authorID int) (*model.Author, error) {
+	author, ok := repository.authors[authorID]
 	if !ok {
-		return nil, ErrAuthorNotFound
+		return nil, model.ErrAuthorNotFound
 	}
 	return author, nil
 }
@@ -37,20 +37,16 @@ func (repository *InMemoryAuthorRepository) Create(author *model.Author) (*model
 	return author, nil
 }
 
-func (repository *InMemoryAuthorRepository) Update(id int, author *model.Author) error {
-	if _, ok := repository.authors[id]; !ok {
-		return ErrAuthorNotFound
+func (repository *InMemoryAuthorRepository) Update(authorID int, author *model.Author) error {
+	if _, ok := repository.authors[authorID]; !ok {
+		return model.ErrAuthorNotFound
 	}
-	author.ID = id
-	repository.authors[id] = author
+	author.ID = authorID
+	repository.authors[authorID] = author
 	return nil
 }
 
-func (repository *InMemoryAuthorRepository) Delete(id int) (*model.Author, error) {
-	author, ok := repository.authors[id]
-	if !ok {
-		return nil, ErrAuthorNotFound
-	}
-	delete(repository.authors, id)
-	return author, nil
+func (repository *InMemoryAuthorRepository) Delete(authorID int) error {
+	delete(repository.authors, authorID)
+	return nil
 }

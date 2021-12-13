@@ -23,10 +23,10 @@ func (repository *InMemoryOrderRepository) All() []*model.Order {
 	return orders
 }
 
-func (repository *InMemoryOrderRepository) Read(id int) (*model.Order, error) {
-	order, ok := repository.orders[id]
+func (repository *InMemoryOrderRepository) Read(orderID int) (*model.Order, error) {
+	order, ok := repository.orders[orderID]
 	if !ok {
-		return nil, ErrOrderNotFound
+		return nil, model.ErrOrderNotFound
 	}
 	return order, nil
 }

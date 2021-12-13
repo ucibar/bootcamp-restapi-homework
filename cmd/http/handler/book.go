@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bootcamp-homework/model"
-	"bootcamp-homework/repository"
+	"bootcamp-homework/service"
 	"errors"
 	"github.com/gorilla/mux"
 	"log"
@@ -11,29 +11,18 @@ import (
 	"strings"
 )
 
-type BookRepository interface {
-	All() []*model.Book
-	Read(id int) (*model.Book, error)
-	ReadByAuthor(authorID int) []*model.Book
-	Delete(id int) (*model.Book, error)
-	Create(book *model.Book) (*model.Book, error)
-	Update(id int, book *model.Book) error
-
-	Filter(filter *model.BookFilter) []*model.Book
-}
-
 type BookHandler struct {
-	repository BookRepository
+	service *service.BookService
 }
 
-func NewBookHandler(repository BookRepository) *BookHandler {
-	return &BookHandler{repository: repository}
+func NewBookHandler(service *service.BookService) *BookHandler {
+	return &BookHandler{service: service}
 }
 
 // GetAllBooks returns a list of books
 // if authors query parameter with format '1,2,3' is specified, it will return books filtered by authors
 // if price query parameter with format '<operator> <price>' is specified, it will return books filtered by price
-func (handler BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
+func (handler *BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	bookFilter := model.NewBookFilter()
@@ -56,7 +45,7 @@ func (handler BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 		bookFilter.PriceFilter = priceFilter
 	}
 
-	books := handler.repository.Filter(bookFilter)
+	books := handler.service.GetBooksByFilter(bookFilter)
 
 	response := &JSONResponse{Data: books}
 
@@ -68,7 +57,7 @@ func (handler *BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	JSONReader(w, r.Body, book)
 
-	book, err := handler.repository.Create(book)
+	book, err := handler.service.CreateBook(book)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
@@ -86,9 +75,9 @@ func (handler *BookHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 
 	response := &JSONResponse{}
 
-	book, err := handler.repository.Read(id)
+	book, err := handler.service.GetBookByID(id)
 
-	if errors.Is(err, repository.ErrBookNotFound) {
+	if errors.Is(err, model.ErrBookNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
@@ -113,9 +102,9 @@ func (handler *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 	response := &JSONResponse{}
 
-	err = handler.repository.Update(id, book)
+	err = handler.service.UpdateBook(id, book)
 
-	if errors.Is(err, repository.ErrBookNotFound) {
+	if errors.Is(err, model.ErrBookNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
@@ -136,9 +125,9 @@ func (handler *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 	response := &JSONResponse{}
 
-	book, err := handler.repository.Delete(id)
+	book, err := handler.service.DeleteBook(id)
 
-	if errors.Is(err, repository.ErrBookNotFound) {
+	if errors.Is(err, model.ErrBookNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
@@ -150,6 +139,52 @@ func (handler *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.Data = book
+
+	JSONWriter(w, response)
+}
+
+func (handler *BookHandler) GetBooksOfAuthor(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+
+	response := &JSONResponse{}
+
+	books, err := handler.service.GetBooksByAuthorID(id)
+
+	if errors.Is(err, model.ErrAuthorNotFound) {
+		w.WriteHeader(http.StatusNotFound)
+		response.Error = err.Error()
+		JSONWriter(w, response)
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	response.Data = books
+
+	JSONWriter(w, response)
+}
+
+func (handler *BookHandler) GetAuthorOfBook(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+
+	response := &JSONResponse{}
+
+	author, err := handler.service.GetAuthorOfBook(id)
+
+	if errors.Is(err, model.ErrBookNotFound) {
+		w.WriteHeader(http.StatusNotFound)
+		response.Error = err.Error()
+		JSONWriter(w, response)
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	response.Data = author
 
 	JSONWriter(w, response)
 }

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bootcamp-homework/model"
-	"bootcamp-homework/repository"
+	"bootcamp-homework/service"
 	"errors"
 	"github.com/gorilla/mux"
 	"log"
@@ -11,22 +11,16 @@ import (
 	"time"
 )
 
-type OrderRepository interface {
-	All() []*model.Order
-	Read(id int) (*model.Order, error)
-	Create(order *model.Order) (*model.Order, error)
-}
-
 type OrderHandler struct {
-	repository OrderRepository
+	service *service.OrderService
 }
 
-func NewOrderHandler(repository OrderRepository) *OrderHandler {
-	return &OrderHandler{repository: repository}
+func NewOrderHandler(service *service.OrderService) *OrderHandler {
+	return &OrderHandler{service: service}
 }
 
-func (handler OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
-	orders := handler.repository.All()
+func (handler *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
+	orders := handler.service.GetAllOrders()
 
 	response := &JSONResponse{Data: orders}
 
@@ -40,7 +34,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	order.CreatedAt = time.Now()
 
-	order, err := handler.repository.Create(order)
+	order, err := handler.service.CreateOrder(order)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
@@ -58,9 +52,9 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	response := &JSONResponse{}
 
-	order, err := handler.repository.Read(id)
+	order, err := handler.service.GetOrderByID(id)
 
-	if errors.Is(err, repository.ErrOrderNotFound) {
+	if errors.Is(err, model.ErrOrderNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		response.Error = err.Error()
 		JSONWriter(w, response)
