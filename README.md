@@ -1,4 +1,9 @@
 # Book Catalogue, Order RESTful API
+## Install
+```
+$ go build ./cmd/http/
+$ ./http
+```
 
 ## Implemented Endpoints
 - `GET /authors` get details of all authors
