@@ -1,8 +1,11 @@
 # Book Catalogue, Order RESTful API
+try on heroku: [https://pacific-island-57943.herokuapp.com](https://pacific-island-57943.herokuapp.com)
+
+Note: '/' endpoint redirect to github repository for documentation.
 ## Install
 ```
 $ go build ./cmd/http/
-$ ./http
+$ PORT=8080 ./http
 ```
 
 ## Implemented Endpoints
