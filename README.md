@@ -11,6 +11,7 @@
 
 
 - `GET /books` get details of all books. 
+- `GET /books?authors=1,2,3` get books with by authors
 - `GET /books?price=":price"` get books with price equal to <price>
 - `GET /books?price="< :price"` get books with price lower than <price>
 - `GET /books?price="> :price"` get books with price higher than <price>

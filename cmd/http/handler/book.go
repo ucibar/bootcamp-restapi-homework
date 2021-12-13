@@ -19,7 +19,7 @@ type BookRepository interface {
 	Create(book *model.Book) (*model.Book, error)
 	Update(id int, book *model.Book) error
 
-	ReadByPrice(price float64, operator string) []*model.Book
+	Filter(filter *model.BookFilter) []*model.Book
 }
 
 type BookHandler struct {
@@ -31,29 +31,32 @@ func NewBookHandler(repository BookRepository) *BookHandler {
 }
 
 // GetAllBooks returns a list of books
+// if authors query parameter with format '1,2,3' is specified, it will return books filtered by authors
 // if price query parameter with format '<operator> <price>' is specified, it will return books filtered by price
 func (handler BookHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
-	var books []*model.Book
-
 	query := r.URL.Query()
 
-	if query.Has("price") {
-		priceQuery := strings.Fields(query.Get("price"))
+	bookFilter := model.NewBookFilter()
 
-		var price float64
-		var operator string = "="
-
-		if len(priceQuery) == 1 {
-			price, _ = strconv.ParseFloat(priceQuery[0], 64)
-		} else if len(priceQuery) == 2 {
-			price, _ = strconv.ParseFloat(priceQuery[1], 64)
-			operator = priceQuery[0]
+	if query.Has("authors") {
+		authors := strings.Split(query.Get("authors"), ",")
+		for _, author := range authors {
+			authorID, err := strconv.Atoi(author)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid author id", http.StatusBadRequest)
+				return
+			}
+			bookFilter.AuthorIDs = append(bookFilter.AuthorIDs, authorID)
 		}
-
-		books = handler.repository.ReadByPrice(price, operator)
-	} else {
-		books = handler.repository.All()
 	}
+
+	if query.Has("price") {
+		priceFilter := model.NewBookPriceFilterFromQuery(query.Get("price"))
+		bookFilter.PriceFilter = priceFilter
+	}
+
+	books := handler.repository.Filter(bookFilter)
 
 	response := &JSONResponse{Data: books}
 
