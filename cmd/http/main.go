@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -71,6 +72,13 @@ func main() {
 	r.HandleFunc("/orders", orderHandler.CreateOrder).Methods("POST")
 	r.HandleFunc("/orders/{id:[0-9]+}", orderHandler.GetOrder).Methods("GET")
 
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+
 	log.Println("Server is listening on port 8089")
-	log.Fatal(http.ListenAndServe(":8089", r))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
