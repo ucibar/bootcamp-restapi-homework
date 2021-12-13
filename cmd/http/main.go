@@ -42,6 +42,12 @@ func main() {
 		})
 	})
 
+	// redirect root request to Repository README.md for documentation
+	// TODO: remove hardcoded path
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://github.com/uCibar/bootcamp-restapi-homework", http.StatusMovedPermanently)
+	}).Methods("GET")
+
 	// endpoints for author resource
 	r.HandleFunc("/authors", authorHandler.GetAllAuthors).Methods("GET")
 	r.HandleFunc("/authors", authorHandler.CreateAuthor).Methods("POST")
