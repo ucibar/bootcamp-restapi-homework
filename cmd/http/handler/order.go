@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type OrderRepository interface {
@@ -36,6 +37,8 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	order := &model.Order{}
 
 	JSONReader(w, r.Body, order)
+
+	order.CreatedAt = time.Now()
 
 	order, err := handler.repository.Create(order)
 	if err != nil {
