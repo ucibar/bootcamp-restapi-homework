@@ -1,6 +1,6 @@
 # Book Catalogue, Order RESTful API
 
-## Planned Endpoints
+## Implemented Endpoints
 - `GET /authors` get details of all authors
 - `POST /authors` add new author
 - `GET /authors/:id` get details of an author
